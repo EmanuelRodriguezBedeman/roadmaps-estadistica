@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmaps de Estadística — Curso de Nivelación</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(180deg, #f0f4f8 0%, #e8eef5 100%);
+    color: #1a202c;
+    min-height: 100vh;
+    padding: 60px 24px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  h1 {
+    font-size: 2.6rem;
+    margin-bottom: 14px;
+    color: #1a202c;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    color: #4a5568;
+    font-size: 1.15rem;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .credit {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    background: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: #2d3748;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  /* Grid de roadmaps */
+  .roadmaps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    gap: 24px;
+    margin-bottom: 50px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border-top: 6px solid;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+  }
+
+  .card.test-hip { border-color: #3182ce; }
+  .card.anova { border-color: #38a169; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .test-hip .card-icon { background: linear-gradient(135deg, #3182ce, #2c5282); }
+  .anova .card-icon { background: linear-gradient(135deg, #38a169, #276749); }
+
+  .card h2 {
+    font-size: 1.4rem;
+    color: #1a202c;
+  }
+
+  .card-desc {
+    color: #4a5568;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+
+  .tag {
+    background: #edf2f7;
+    color: #2d3748;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .test-hip .tag { background: #ebf8ff; color: #2b6cb0; }
+  .anova .tag { background: #f0fff4; color: #276749; }
+
+  .formats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .format-btn {
+    text-decoration: none;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 2px solid transparent;
+  }
+
+  .format-btn .format-title {
+    font-size: 0.95rem;
+  }
+
+  .format-btn .format-sub {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+
+  .format-btn.primary {
+    background: linear-gradient(135deg, #3182ce, #2c5282);
+    color: white;
+    box-shadow: 0 2px 8px rgba(49,130,206,0.3);
+  }
+  .anova .format-btn.primary {
+    background: linear-gradient(135deg, #38a169, #276749);
+    box-shadow: 0 2px 8px rgba(56,161,105,0.3);
+  }
+  .format-btn.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(49,130,206,0.4);
+  }
+  .anova .format-btn.primary:hover {
+    box-shadow: 0 4px 14px rgba(56,161,105,0.4);
+  }
+
+  .format-btn.secondary {
+    background: #f7fafc;
+    color: #2d3748;
+    border-color: #e2e8f0;
+  }
+  .format-btn.secondary:hover {
+    background: white;
+    border-color: #cbd5e0;
+  }
+
+  .format-btn.tertiary {
+    grid-column: 1 / -1;
+    background: white;
+    color: #4a5568;
+    border-color: #e2e8f0;
+    text-align: center;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+  .format-btn.tertiary:hover {
+    background: #f7fafc;
+  }
+
+  /* Sección "cómo usarlos" */
+  .info-box {
+    background: white;
+    border-radius: 16px;
+    padding: 30px 36px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border-left: 6px solid #805ad5;
+    margin-bottom: 40px;
+  }
+
+  .info-box h3 {
+    color: #6b46c1;
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+  }
+
+  .info-box p, .info-box li {
+    color: #4a5568;
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+
+  .info-box ul {
+    padding-left: 22px;
+    margin-top: 8px;
+  }
+
+  .info-box code {
+    background: #edf2f7;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 0.88rem;
+    color: #2d3748;
+  }
+
+  footer {
+    text-align: center;
+    color: #718096;
+    font-size: 0.85rem;
+    padding-top: 30px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  footer a {
+    color: #4299e1;
+    text-decoration: none;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .card { padding: 22px; }
+    body { padding: 30px 16px; }
+    .formats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Roadmaps de Estadística</h1>
+    <p class="subtitle">
+      Árboles de decisión para elegir el test estadístico correcto.
+      Pensados como referencia rápida durante el curso de nivelación.
+    </p>
+    <div class="credit">Basado en material del curso · ITBA</div>
+  </header>
+
+  <div class="roadmaps">
+
+    <!-- TEST DE HIPÓTESIS -->
+    <article class="card test-hip">
+      <div class="card-header">
+        <div class="card-icon">H₀</div>
+        <h2>Test de hipótesis</h2>
+      </div>
+      <p class="card-desc">
+        Cómo elegir entre <strong>Z</strong>, <strong>t de Student</strong>, <strong>F de Fisher</strong>,
+        <strong>Wilcoxon</strong> y <strong>Mann-Whitney</strong> según el parámetro
+        (media, proporción, varianza, mediana) y el diseño muestral.
+      </p>
+      <div class="card-tags">
+        <span class="tag">Media</span>
+        <span class="tag">Proporción</span>
+        <span class="tag">Varianza</span>
+        <span class="tag">Mediana</span>
+      </div>
+      <div class="formats">
+        <a class="format-btn primary" href="roadmap_test_hipotesis.html">
+          <span class="format-title">Vertical →</span>
+          <span class="format-sub">4 columnas · 1 página</span>
+        </a>
+        <a class="format-btn secondary" href="roadmap_test_hipotesis_horizontal.html">
+          <span class="format-title">Horizontal →</span>
+          <span class="format-sub">swimlanes · landscape</span>
+        </a>
+        <a class="format-btn tertiary" href="roadmap_mermaid.md">
+          📐 Fuente Mermaid (markdown)
+        </a>
+      </div>
+    </article>
+
+    <!-- ANOVA -->
+    <article class="card anova">
+      <div class="card-header">
+        <div class="card-icon">F</div>
+        <h2>ANOVA</h2>
+      </div>
+      <p class="card-desc">
+        Análisis de la varianza para <strong>k ≥ 3 grupos</strong>: un factor,
+        factorial (2 factores), medidas repetidas, y los post-hoc
+        (<strong>Bonferroni</strong>, <strong>Tukey HSD</strong>, <strong>LSD Fisher</strong>).
+      </p>
+      <div class="card-tags">
+        <span class="tag">1 Factor</span>
+        <span class="tag">Factorial</span>
+        <span class="tag">Medidas repetidas</span>
+        <span class="tag">Post-hoc</span>
+      </div>
+      <div class="formats">
+        <a class="format-btn primary" href="roadmap_anova.html">
+          <span class="format-title">Vertical →</span>
+          <span class="format-sub">4 columnas · 1 página</span>
+        </a>
+        <a class="format-btn secondary" href="roadmap_anova_horizontal.html">
+          <span class="format-title">Horizontal →</span>
+          <span class="format-sub">swimlanes · landscape</span>
+        </a>
+        <a class="format-btn tertiary" href="roadmap_anova_mermaid.md">
+          📐 Fuente Mermaid (markdown)
+        </a>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="info-box">
+    <h3>¿Cómo leer cada roadmap?</h3>
+    <ul>
+      <li><strong>Cajas naranjas</strong> son decisiones (chequear un supuesto, contar grupos, etc.).</li>
+      <li><strong>Cajas azules / verdes</strong> son tests paramétricos (asumen normalidad).</li>
+      <li><strong>Cajas naranjas oscuras</strong> son correcciones (Welch, Greenhouse-Geisser, Huynh-Feldt).</li>
+      <li><strong>Cajas violetas</strong> son alternativas no paramétricas (Wilcoxon, Mann-Whitney, Kruskal-Wallis).</li>
+    </ul>
+    <p style="margin-top:14px;">
+      Las versiones <code>.md</code> son los diagramas en formato Mermaid — se pueden copiar y pegar
+      en <a href="https://mermaid.live" target="_blank" style="color:#6b46c1;">mermaid.live</a>,
+      GitHub, Notion o VS Code para renderizarlos interactivamente.
+    </p>
+  </div>
+
+  <footer>
+    Hecho con 📐 por <a href="https://github.com/EmanuelRodriguezBedeman">@EmanuelRodriguezBedeman</a>
+    · <a href="https://github.com/EmanuelRodriguezBedeman/roadmaps-estadistica">repositorio en GitHub</a>
+  </footer>
+
+</div>
+</body>
+</html>
