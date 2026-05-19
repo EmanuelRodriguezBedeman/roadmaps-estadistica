@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Roadmap: Test de Hipótesis — Horizontal</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(180deg, #f0f4f8 0%, #e8eef5 100%);
+    padding: 30px 20px;
+    color: #1a202c;
+    min-width: 2400px;
+  }
+
+  .container {
+    max-width: 2600px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    color: #1a202c;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+  }
+
+  /* Checklist */
+  .checklist {
+    background: white;
+    padding: 18px 24px;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-left: 6px solid #4299e1;
+    margin-bottom: 24px;
+  }
+  .checklist h3 {
+    color: #2b6cb0;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .checklist-item {
+    background: #f7fafc;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-top: 3px solid #4299e1;
+    font-size: 0.82rem;
+  }
+  .checklist-item strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #2b6cb0;
+  }
+
+  /* Panel normalidad */
+  .normality-panel {
+    background: linear-gradient(135deg, #fefcbf 0%, #faf089 100%);
+    border: 2px solid #d69e2e;
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(214, 158, 46, 0.15);
+  }
+  .normality-panel h3 {
+    color: #744210;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+  }
+  .normality-panel .methods {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .method-chip {
+    background: white;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #744210;
+    border: 1px solid #d69e2e;
+  }
+  .normality-panel .note-inline {
+    font-size: 0.82rem;
+    color: #744210;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* Swimlane */
+  .swimlane {
+    background: white;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    border-left: 8px solid;
+  }
+  .swimlane.media { border-color: #3182ce; }
+  .swimlane.proporcion { border-color: #38a169; }
+  .swimlane.varianza { border-color: #d69e2e; }
+  .swimlane.mediana { border-color: #805ad5; }
+
+  .param-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 24px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: white;
+    min-width: 60px;
+  }
+  .media .param-label { background: linear-gradient(180deg, #3182ce, #2c5282); }
+  .proporcion .param-label { background: linear-gradient(180deg, #38a169, #276749); }
+  .varianza .param-label { background: linear-gradient(180deg, #d69e2e, #975a16); }
+  .mediana .param-label { background: linear-gradient(180deg, #805ad5, #553c9a); }
+
+  .flow {
+    display: flex;
+    flex: 1;
+    padding: 16px;
+    gap: 20px;
+    overflow-x: auto;
+    align-items: stretch;
+  }
+
+  .case-block {
+    display: flex;
+    flex-direction: column;
+    background: #f7fafc;
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    min-width: fit-content;
+  }
+
+  .case-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 14px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    text-align: center;
+    border-left: 3px solid #4299e1;
+  }
+  .proporcion .case-title { border-left-color: #48bb78; }
+  .varianza .case-title { border-left-color: #ed8936; }
+  .mediana .case-title { border-left-color: #9f7aea; }
+
+  /* TREE LAYOUT */
+  .tree-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .branches {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    margin-left: 22px;
+    padding-left: 22px;
+  }
+
+  .branches::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    background: #a0aec0;
+  }
+
+  .connector-in {
+    width: 22px;
+    height: 2px;
+    background: #a0aec0;
+    flex-shrink: 0;
+  }
+
+  .branch {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+  }
+
+  .branch::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 50%;
+    width: 22px;
+    height: 2px;
+    background: #a0aec0;
+  }
+
+  /* Nodos */
+  .node {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+
+  .decision {
+    background: #fef5e7;
+    border: 2px solid #ed8936;
+    font-weight: 600;
+    color: #744210;
+  }
+
+  .decision.normality {
+    background: #fefcbf;
+    border-color: #d69e2e;
+  }
+
+  .requirement {
+    background: #ebf8ff;
+    border: 2px dashed #4299e1;
+    font-weight: 600;
+    color: #2a4365;
+    font-size: 0.78rem;
+  }
+
+  .branch-label {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-right: 8px;
+  }
+  .branch-label.si { background: #c6f6d5; color: #22543d; border: 1px solid #68d391; }
+  .branch-label.no { background: #fed7d7; color: #742a2a; border: 1px solid #fc8181; }
+  .branch-label.neutral { background: #e2e8f0; color: #2d3748; border: 1px solid #cbd5e0; }
+
+  .test {
+    background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+    color: white;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(49,130,206,0.3);
+    font-size: 0.82rem;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+  .test.green {
+    background: linear-gradient(135deg, #38a169 0%, #276749 100%);
+    box-shadow: 0 2px 6px rgba(56,161,105,0.3);
+  }
+  .test.orange {
+    background: linear-gradient(135deg, #dd6b20 0%, #9c4221 100%);
+    box-shadow: 0 2px 6px rgba(221,107,32,0.3);
+  }
+  .test.purple {
+    background: linear-gradient(135deg, #805ad5 0%, #553c9a 100%);
+    box-shadow: 0 2px 6px rgba(128,90,213,0.3);
+  }
+
+  .test code {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    background: rgba(0,0,0,0.25);
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-family: "Consolas", "Monaco", monospace;
+    font-weight: normal;
+  }
+
+  /* Opciones múltiples (ej: Box-Cox o Wilcoxon) */
+  .test-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-left: 8px;
+  }
+
+  .simple-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .simple-row .arrow {
+    font-size: 1.2rem;
+    color: #a0aec0;
+    font-weight: bold;
+  }
+
+  .note {
+    background: #fffaf0;
+    border-left: 3px solid #ed8936;
+    padding: 8px 12px;
+    margin-top: 12px;
+    font-size: 0.78rem;
+    border-radius: 4px;
+    color: #744210;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+
+  .step-tag {
+    display: inline-block;
+    background: #bee3f8;
+    color: #2a4365;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 6px;
+  }
+
+  .or-label {
+    font-size: 0.7rem;
+    color: #718096;
+    font-weight: 700;
+    text-align: center;
+    padding: 2px 0;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #718096;
+  }
+
+  @media print {
+    body { background: white; padding: 5px; min-width: auto; }
+    .swimlane { page-break-inside: avoid; }
+    @page { size: landscape; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Roadmap: ¿Qué test de hipótesis usar?</h1>
+  <p class="subtitle">Árbol de decisión horizontal</p>
+
+  <!-- CHECKLIST -->
+  <div class="checklist">
+    <h3>Checklist previo a cualquier test</h3>
+    <div class="checklist-grid">
+      <div class="checklist-item"><strong>1. Explorar</strong>histograma, boxplot, QQ-plot</div>
+      <div class="checklist-item"><strong>2. Verificar supuestos</strong>normalidad (Shapiro-Wilk), independencia, igualdad de varianzas</div>
+      <div class="checklist-item"><strong>3. Elegir test</strong>según parámetro y diseño (este roadmap)</div>
+      <div class="checklist-item"><strong>4. Decidir</strong>p-valor + tamaño del efecto (d de Cohen)</div>
+      <div class="checklist-item"><strong>5. Complementar</strong>con intervalo de confianza — aporta más que el p-valor solo</div>
+    </div>
+  </div>
+
+  <!-- PANEL NORMALIDAD -->
+  <div class="normality-panel">
+    <h3>⚠ Evaluación del supuesto de normalidad</h3>
+    <div class="methods">
+      <div class="method-chip">Histograma</div>
+      <div class="method-chip">Boxplot</div>
+      <div class="method-chip">QQ-plot</div>
+      <div class="method-chip">Test de Shapiro-Wilk</div>
+    </div>
+    <div class="note-inline">
+      Los tests <strong>t</strong> (una muestra, dos muestras, apareado) y el test <strong>F de Fisher</strong> suponen normalidad.
+      Antes de aplicarlos hay que evaluarla con gráficos y Shapiro-Wilk. Si no se cumple: transformación de
+      <strong>Box-Cox</strong> o alternativa no paramétrica (<strong>Wilcoxon/Mann-Whitney</strong>,
+      <strong>Levene/Fligner-Killeen</strong>).
+      Si <strong>n es grande</strong>, el Teorema Central del Límite permite omitir el supuesto.
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: MEDIA -->
+  <!-- =============================== -->
+  <div class="swimlane media">
+    <div class="param-label">MEDIA (μ)</div>
+    <div class="flow">
+
+      <!-- ===== A · Una muestra ===== -->
+      <div class="case-block">
+        <div class="case-title">A · Una muestra — H₀: μ = μ₀</div>
+
+        <div class="tree-row">
+          <div class="node decision">¿Conocés σ poblacional?</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <!-- σ CONOCIDA → Test Z -->
+            <div class="branch">
+              <span class="branch-label si">SÍ · σ conocida</span>
+              <div class="tree-row">
+                <div class="node requirement">Requisito:<br>normal <em>o</em> n grande</div>
+                <div class="connector-in"></div>
+                <div class="test">Test Z <code>(x̄−μ₀)/(σ/√n) ~ N(0,1)</code></div>
+              </div>
+            </div>
+
+            <!-- σ DESCONOCIDA -->
+            <div class="branch">
+              <span class="branch-label no">NO · σ desconocida</span>
+              <div class="tree-row">
+                <div class="node decision">¿n grande?</div>
+                <div class="connector-in"></div>
+                <div class="branches">
+
+                  <!-- n GRANDE → Z asintótico -->
+                  <div class="branch">
+                    <span class="branch-label si">SÍ · n grande</span>
+                    <div class="tree-row">
+                      <div class="node requirement">TCL:<br>s ≈ σ</div>
+                      <div class="connector-in"></div>
+                      <div class="test">Test Z asintótico <code>(x̄−μ₀)/(s/√n) ≈ N(0,1)</code></div>
+                    </div>
+                  </div>
+
+                  <!-- n CHICA → evaluar normalidad -->
+                  <div class="branch">
+                    <span class="branch-label no">NO · n chica</span>
+                    <div class="tree-row">
+                      <div class="node decision normality">Shapiro-Wilk<br>+ gráficos</div>
+                      <div class="connector-in"></div>
+                      <div class="branches">
+
+                        <!-- Normal → t de Student -->
+                        <div class="branch">
+                          <span class="branch-label si">Normal</span>
+                          <div class="test">Test t de Student <code>t.test(x, mu=μ₀) ~ t_{n−1}</code></div>
+                        </div>
+
+                        <!-- No normal → Box-Cox o Wilcoxon -->
+                        <div class="branch">
+                          <span class="branch-label no">No normal</span>
+                          <div class="test-group">
+                            <div class="test">Box-Cox + t de Student <code>transformar y reintentar</code></div>
+                            <div class="or-label">— o —</div>
+                            <div class="test purple">Wilcoxon 1 muestra <code>wilcox.test(x, mu=μ₀)</code></div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== B · Dos muestras independientes ===== -->
+      <div class="case-block">
+        <div class="case-title">B · Dos muestras independientes — H₀: μ₁ = μ₂</div>
+
+        <div class="tree-row">
+          <div class="node decision">¿σ₁², σ₂² conocidas?</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <!-- Varianzas conocidas (caso raro) -->
+            <div class="branch">
+              <span class="branch-label si">SÍ</span>
+              <div class="test">Test Z para 2 medias <code>(x̄₁−x̄₂)/√(σ₁²/n₁ + σ₂²/n₂)</code></div>
+            </div>
+
+            <!-- Varianzas desconocidas -->
+            <div class="branch">
+              <span class="branch-label no">NO · desconocidas</span>
+              <div class="tree-row">
+                <div class="node decision">¿n₁ y n₂ ≥ 40?</div>
+                <div class="connector-in"></div>
+                <div class="branches">
+
+                  <!-- Muestras grandes: TCL -->
+                  <div class="branch">
+                    <span class="branch-label si">SÍ · TCL</span>
+                    <div class="test">Test Z asintótico 2 medias <code>no requiere normalidad</code></div>
+                  </div>
+
+                  <!-- Muestras chicas: normalidad en cada grupo -->
+                  <div class="branch">
+                    <span class="branch-label no">NO · n chicas</span>
+                    <div class="tree-row">
+                      <div class="node decision normality">Shapiro-Wilk en<br>cada grupo</div>
+                      <div class="connector-in"></div>
+                      <div class="branches">
+
+                        <!-- Alguno no normal → Mann-Whitney -->
+                        <div class="branch">
+                          <span class="branch-label no">Alguno no normal</span>
+                          <div class="test purple">Mann-Whitney-Wilcoxon <code>wilcox.test(x1, x2)</code></div>
+                        </div>
+
+                        <!-- Ambos normales → F de Fisher -->
+                        <div class="branch">
+                          <span class="branch-label si">Ambos normales</span>
+                          <div class="tree-row">
+                            <div class="node decision">Test F de Fisher<br>¿σ₁² = σ₂²?<br><span style="font-weight:normal;font-size:0.7rem">var.test(x1, x2)</span></div>
+                            <div class="connector-in"></div>
+                            <div class="branches">
+
+                              <div class="branch">
+                                <span class="branch-label si">Iguales</span>
+                                <div class="test">t pooled <code>t.test(..., var.equal=TRUE)</code></div>
+                              </div>
+
+                              <div class="branch">
+                                <span class="branch-label no">Distintas</span>
+                                <div class="test orange">t de Welch <code>t.test(x1, x2)</code></div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== C · Apareadas ===== -->
+      <div class="case-block">
+        <div class="case-title">C · Muestras apareadas — H₀: μ_D = 0</div>
+
+        <div class="tree-row">
+          <div class="node decision"><span class="step-tag">1</span>D = X₁ − X₂</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+            <div class="branch">
+              <div class="tree-row">
+                <div class="node decision normality"><span class="step-tag">2</span>Shapiro-Wilk en D</div>
+                <div class="connector-in"></div>
+                <div class="branches">
+
+                  <div class="branch">
+                    <span class="branch-label si">Normal</span>
+                    <div class="test">t pareado <code>t.test(x1, x2, paired=TRUE) ~ t_{n−1}</code></div>
+                  </div>
+
+                  <div class="branch">
+                    <span class="branch-label no">No normal</span>
+                    <div class="test purple">Wilcoxon signed-rank <code>wilcox.test(..., paired=TRUE)</code></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: PROPORCIÓN -->
+  <!-- =============================== -->
+  <div class="swimlane proporcion">
+    <div class="param-label">PROPORCIÓN (p)</div>
+    <div class="flow">
+
+      <!-- Una proporción -->
+      <div class="case-block">
+        <div class="case-title">Una proporción — H₀: p = p₀</div>
+
+        <div class="tree-row">
+          <div class="node decision">Condición éxito-fracaso:<br>n·p₀ ≥ 10 <em>y</em> n·(1−p₀) ≥ 10</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label si">SÍ · muestra grande</span>
+              <div class="test green">Test Z para proporción <code>prop.test(x, n, p=p₀)</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label no">NO · muestra chica</span>
+              <div class="test green">Binomial exacto <code>binom.test(x, n, p=p₀)</code></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="note">
+          Supuestos: independencia, muestreo aleatorio y condición éxito-fracaso.
+          La <strong>corrección de Yates</strong> se usa en muestras pequeñas; en muestras grandes su efecto es despreciable.
+        </div>
+      </div>
+
+      <!-- Dos proporciones -->
+      <div class="case-block">
+        <div class="case-title">Dos proporciones — H₀: p₁ = p₂</div>
+
+        <div class="simple-row">
+          <div class="node requirement">Muestras grandes<br>(TCL)</div>
+          <span class="arrow">→</span>
+          <div class="test green">Test Z para 2 proporciones <code>prop.test(c(x1,x2), c(n1,n2))</code></div>
+        </div>
+
+        <div class="note">
+          Bajo H₀, proporción combinada: p̂ = (x₁ + x₂) / (n₁ + n₂).<br>
+          Estadístico Z ≈ N(0,1) por TCL.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: VARIANZA -->
+  <!-- =============================== -->
+  <div class="swimlane varianza">
+    <div class="param-label">VARIANZA (σ²)</div>
+    <div class="flow">
+
+      <div class="case-block">
+        <div class="case-title">Comparar 2 varianzas — H₀: σ₁² = σ₂² · paso intermedio dentro del caso B de Media</div>
+
+        <div class="tree-row">
+          <div class="node decision normality">¿Datos normales<br>en ambos grupos?</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label si">SÍ</span>
+              <div class="test orange">Test F de Fisher <code>var.test(x1, x2) ~ F_{n₁−1, n₂−1}</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label no">NO</span>
+              <div class="test orange">Levene / Fligner-Killeen <code>más robustos ante no normalidad</code></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="note">
+          El resultado alimenta el caso B de Media:<br>
+          <strong>iguales</strong> → t pooled · <strong>distintas</strong> → t de Welch
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: MEDIANA -->
+  <!-- =============================== -->
+  <div class="swimlane mediana">
+    <div class="param-label">MEDIANA</div>
+    <div class="flow">
+
+      <div class="case-block">
+        <div class="case-title">Mann-Whitney-Wilcoxon · alternativa no paramétrica al t cuando no hay normalidad</div>
+
+        <div class="simple-row">
+          <span class="branch-label neutral">1 muestra vs m₀</span>
+          <span class="arrow">→</span>
+          <div class="test purple">Wilcoxon 1 muestra <code>wilcox.test(x, mu=m₀)</code></div>
+        </div>
+
+        <div class="simple-row">
+          <span class="branch-label neutral">2 indep.</span>
+          <span class="arrow">→</span>
+          <div class="test purple">Mann-Whitney-Wilcoxon <code>wilcox.test(x1, x2)</code></div>
+        </div>
+
+        <div class="simple-row">
+          <span class="branch-label neutral">Apareadas</span>
+          <span class="arrow">→</span>
+          <div class="test purple">Wilcoxon signed-rank <code>wilcox.test(..., paired=TRUE)</code></div>
+        </div>
+      </div>
+
+      <div class="case-block" style="background:#faf5ff;">
+        <div class="case-title" style="border-left-color:#9f7aea;">¿Cuándo usarlo?</div>
+        <div style="font-size:0.85rem; padding:6px 4px; line-height:1.7;">
+          ✓ hay outliers<br>
+          ✓ las distribuciones no son normales<br>
+          ✓ los tamaños muestrales son pequeños
+        </div>
+        <div class="note" style="margin-top:10px;">
+          Hipótesis:<br>
+          H₀: las distribuciones (o medianas) son iguales<br>
+          H₁: son distintas
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Basado en: Curso de Nivelación en Estadística — Martina Oviedo (Test de hipótesis)
+  </div>
+
+</div>
+</body>
+</html>

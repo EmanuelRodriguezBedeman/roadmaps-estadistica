@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Roadmap: ANOVA — Horizontal</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(180deg, #f0f4f8 0%, #e8eef5 100%);
+    padding: 30px 20px;
+    color: #1a202c;
+    min-width: 2400px;
+  }
+
+  .container {
+    max-width: 2600px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    color: #1a202c;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+  }
+
+  /* Checklist */
+  .checklist {
+    background: white;
+    padding: 18px 24px;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-left: 6px solid #4299e1;
+    margin-bottom: 18px;
+  }
+  .checklist h3 {
+    color: #2b6cb0;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+  .checklist-item {
+    background: #f7fafc;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-top: 3px solid #4299e1;
+    font-size: 0.82rem;
+  }
+  .checklist-item strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #2b6cb0;
+  }
+
+  /* Panel decisión inicial */
+  .decision-panel {
+    background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+    border: 2px solid #319795;
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(49, 151, 149, 0.15);
+  }
+  .decision-panel h3 {
+    color: #234e52;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+  }
+  .decision-panel .crit {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .crit-chip {
+    background: white;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #234e52;
+    border: 1px solid #319795;
+  }
+  .decision-panel .note-inline {
+    font-size: 0.82rem;
+    color: #234e52;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* Swimlane */
+  .swimlane {
+    background: white;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    border-left: 8px solid;
+  }
+  .swimlane.unfactor { border-color: #3182ce; }
+  .swimlane.factorial { border-color: #38a169; }
+  .swimlane.repetidas { border-color: #dd6b20; }
+  .swimlane.posthoc { border-color: #805ad5; }
+
+  .param-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 24px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: white;
+    min-width: 60px;
+    text-align: center;
+  }
+  .unfactor .param-label { background: linear-gradient(180deg, #3182ce, #2c5282); }
+  .factorial .param-label { background: linear-gradient(180deg, #38a169, #276749); }
+  .repetidas .param-label { background: linear-gradient(180deg, #dd6b20, #9c4221); }
+  .posthoc .param-label { background: linear-gradient(180deg, #805ad5, #553c9a); }
+
+  .flow {
+    display: flex;
+    flex: 1;
+    padding: 16px;
+    gap: 20px;
+    overflow-x: auto;
+    align-items: stretch;
+  }
+
+  .case-block {
+    display: flex;
+    flex-direction: column;
+    background: #f7fafc;
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    min-width: fit-content;
+  }
+
+  .case-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 14px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    text-align: center;
+    border-left: 3px solid #4299e1;
+  }
+  .factorial .case-title { border-left-color: #48bb78; }
+  .repetidas .case-title { border-left-color: #ed8936; }
+  .posthoc .case-title { border-left-color: #9f7aea; }
+
+  /* TREE LAYOUT */
+  .tree-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .branches {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    margin-left: 22px;
+    padding-left: 22px;
+  }
+
+  .branches::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    background: #a0aec0;
+  }
+
+  .connector-in {
+    width: 22px;
+    height: 2px;
+    background: #a0aec0;
+    flex-shrink: 0;
+  }
+
+  .branch {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+  }
+
+  .branch::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 50%;
+    width: 22px;
+    height: 2px;
+    background: #a0aec0;
+  }
+
+  /* Nodos */
+  .node {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+
+  .decision {
+    background: #fef5e7;
+    border: 2px solid #ed8936;
+    font-weight: 600;
+    color: #744210;
+  }
+
+  .decision.normality {
+    background: #fefcbf;
+    border-color: #d69e2e;
+  }
+
+  .decision.sphericity {
+    background: #fed7d7;
+    border-color: #c53030;
+    color: #742a2a;
+  }
+
+  .requirement {
+    background: #ebf8ff;
+    border: 2px dashed #4299e1;
+    font-weight: 600;
+    color: #2a4365;
+    font-size: 0.78rem;
+  }
+
+  .branch-label {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-right: 8px;
+  }
+  .branch-label.si { background: #c6f6d5; color: #22543d; border: 1px solid #68d391; }
+  .branch-label.no { background: #fed7d7; color: #742a2a; border: 1px solid #fc8181; }
+  .branch-label.neutral { background: #e2e8f0; color: #2d3748; border: 1px solid #cbd5e0; }
+
+  .test {
+    background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+    color: white;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(49,130,206,0.3);
+    font-size: 0.82rem;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+  .test.green {
+    background: linear-gradient(135deg, #38a169 0%, #276749 100%);
+    box-shadow: 0 2px 6px rgba(56,161,105,0.3);
+  }
+  .test.orange {
+    background: linear-gradient(135deg, #dd6b20 0%, #9c4221 100%);
+    box-shadow: 0 2px 6px rgba(221,107,32,0.3);
+  }
+  .test.purple {
+    background: linear-gradient(135deg, #805ad5 0%, #553c9a 100%);
+    box-shadow: 0 2px 6px rgba(128,90,213,0.3);
+  }
+  .test.gray {
+    background: linear-gradient(135deg, #a0aec0 0%, #4a5568 100%);
+    box-shadow: 0 2px 6px rgba(74,85,104,0.3);
+  }
+
+  .test code {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    background: rgba(0,0,0,0.25);
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-family: "Consolas", "Monaco", monospace;
+    font-weight: normal;
+  }
+
+  .test-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-left: 8px;
+  }
+
+  .simple-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .simple-row .arrow {
+    font-size: 1.2rem;
+    color: #a0aec0;
+    font-weight: bold;
+  }
+
+  .note {
+    background: #fffaf0;
+    border-left: 3px solid #ed8936;
+    padding: 8px 12px;
+    margin-top: 12px;
+    font-size: 0.78rem;
+    border-radius: 4px;
+    color: #744210;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+
+  .step-tag {
+    display: inline-block;
+    background: #bee3f8;
+    color: #2a4365;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 6px;
+  }
+
+  .or-label {
+    font-size: 0.7rem;
+    color: #718096;
+    font-weight: 700;
+    text-align: center;
+    padding: 2px 0;
+  }
+
+  /* Tabla resumen */
+  .summary-table {
+    background: white;
+    padding: 20px 24px;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-left: 6px solid #2b6cb0;
+    margin-top: 24px;
+    overflow-x: auto;
+  }
+  .summary-table h3 {
+    color: #2b6cb0;
+    margin-bottom: 14px;
+    font-size: 1.1rem;
+  }
+  .summary-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .summary-table th, .summary-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+  }
+  .summary-table th {
+    background: #edf2f7;
+    color: #2d3748;
+    font-weight: 700;
+  }
+  .summary-table tr.highlight td {
+    background: #ebf8ff;
+    font-weight: 600;
+  }
+  .summary-table code {
+    font-family: "Consolas", "Monaco", monospace;
+    background: #f7fafc;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.82rem;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #718096;
+  }
+
+  @media print {
+    body { background: white; padding: 5px; min-width: auto; }
+    .swimlane { page-break-inside: avoid; }
+    @page { size: landscape; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Roadmap: ANOVA — Análisis de la Varianza</h1>
+  <p class="subtitle">Árbol de decisión horizontal · k ≥ 3 grupos</p>
+
+  <!-- CHECKLIST -->
+  <div class="checklist">
+    <h3>Checklist global ANOVA</h3>
+    <div class="checklist-grid">
+      <div class="checklist-item"><strong>1. Explorar</strong>boxplot por grupo, QQ-plot, medias</div>
+      <div class="checklist-item"><strong>2. Supuestos</strong>independencia, normalidad (residuos), Levene, esfericidad (si rep.)</div>
+      <div class="checklist-item"><strong>3. Elegir test</strong>1F · 2F · rep · Welch · Kruskal-Wallis</div>
+      <div class="checklist-item"><strong>4. F-ratio</strong>+ p-valor + η² (tamaño del efecto)</div>
+      <div class="checklist-item"><strong>5. Post-hoc</strong>si rechazo H₀: Bonferroni / Tukey / LSD</div>
+      <div class="checklist-item"><strong>6. Reportar</strong>F(gl₁, gl₂) = valor, p, η², test usado</div>
+    </div>
+  </div>
+
+  <!-- PANEL DECISIÓN INICIAL -->
+  <div class="decision-panel">
+    <h3>⚡ Decisión inicial — ubicar el problema</h3>
+    <div class="crit">
+      <div class="crit-chip">2 grupos → test t (otro roadmap)</div>
+      <div class="crit-chip">k ≥ 3 grupos → ANOVA</div>
+      <div class="crit-chip">1 factor → ANOVA 1F</div>
+      <div class="crit-chip">2+ factores → ANOVA factorial</div>
+      <div class="crit-chip">Mismos sujetos → ANOVA medidas repetidas</div>
+    </div>
+    <div class="note-inline">
+      ANOVA supone <strong>independencia</strong>, <strong>normalidad</strong> de residuos y <strong>homocedasticidad</strong>.
+      Si falla normalidad de forma extrema con n chico → <strong>Kruskal-Wallis</strong>.
+      Si falla solo homocedasticidad → <strong>ANOVA de Welch</strong>.
+      Si es medidas repetidas se agrega <strong>esfericidad</strong> (Mauchly) → correcciones GG / HF.
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: ANOVA 1 FACTOR -->
+  <!-- =============================== -->
+  <div class="swimlane unfactor">
+    <div class="param-label">ANOVA 1 FACTOR</div>
+    <div class="flow">
+
+      <!-- Caso A: Supuestos -->
+      <div class="case-block">
+        <div class="case-title">A · Verificar supuestos en cadena</div>
+
+        <div class="simple-row">
+          <span class="step-tag">PASO 1</span>
+          <div class="node requirement">Independencia<br>(diseño aleatorizado)</div>
+          <span class="arrow">→</span>
+          <span class="step-tag">PASO 2</span>
+          <div class="node decision normality">Normalidad de residuos</div>
+        </div>
+
+        <div class="tree-row">
+          <div class="node decision normality">Shapiro / Lilliefors / QQ</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label si">OK · Normal</span>
+              <div class="tree-row">
+                <div class="node decision">¿Homocedasticidad?<br>Test de Levene</div>
+                <div class="connector-in"></div>
+                <div class="branches">
+
+                  <div class="branch">
+                    <span class="branch-label si">OK · σ²ᵢ iguales</span>
+                    <div class="test">ANOVA estándar <code>F = MST/MSE ~ F_{k−1, N−k}</code></div>
+                  </div>
+
+                  <div class="branch">
+                    <span class="branch-label no">FALLA</span>
+                    <div class="test orange">ANOVA de Welch (heterocedástico) <code>corrige glₙ y gl_d</code></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label no">FALLA · asimetría + n chico</span>
+              <div class="test purple">Kruskal-Wallis <code>H ~ χ²_{k−1}</code></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Caso B: Decisión -->
+      <div class="case-block">
+        <div class="case-title">B · Decisión y post-hoc</div>
+
+        <div class="tree-row">
+          <div class="node decision">¿F &gt; F_crítico o p &lt; α?</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label si">SÍ · rechazo H₀</span>
+              <div class="test purple">→ Ir al swimlane Post-hoc <code>al menos 2 medias difieren</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label no">NO · no rechazo</span>
+              <div class="test gray">Sin evidencia de diferencias <code>fin del análisis</code></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Cálculos:</strong> SSB = Σnᵢ(X̄ᵢ−X̄)², SSW = ΣΣ(Xᵢⱼ−X̄ᵢ)², SST = SSB+SSW.<br>
+          <strong>η² = SSB/SST</strong> mide qué proporción de la varianza explica el factor.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: ANOVA FACTORIAL -->
+  <!-- =============================== -->
+  <div class="swimlane factorial">
+    <div class="param-label">ANOVA FACTORIAL</div>
+    <div class="flow">
+
+      <!-- Caso A: 3 hipótesis -->
+      <div class="case-block">
+        <div class="case-title">A · 3 H₀ en simultáneo · Factor A (k₁ niv.) · Factor B (k₂ niv.)</div>
+
+        <div class="simple-row">
+          <div class="node requirement">Supuestos:<br>indep + normal + homoced<br>+ tamaños iguales por celda</div>
+          <span class="arrow">→</span>
+          <div class="node requirement">Calcular SS_A, SS_B,<br>SS_AB, SSE</div>
+        </div>
+
+        <div class="tree-row">
+          <div class="node decision">3 F-ratios en paralelo</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label neutral">H₀⁽¹⁾</span>
+              <div class="test green">Efecto principal A · F_A = MS_A / MSE <code>gl = (k₁−1, N−k₁k₂)</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label neutral">H₀⁽²⁾</span>
+              <div class="test green">Efecto principal B · F_B = MS_B / MSE <code>gl = (k₂−1, N−k₁k₂)</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label neutral">H₀⁽³⁾</span>
+              <div class="test green">Interacción A×B · F_AB = MS_AB / MSE <code>gl = ((k₁−1)(k₂−1), N−k₁k₂)</code></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Caso B: orden de interpretación -->
+      <div class="case-block">
+        <div class="case-title">B · Orden de interpretación</div>
+
+        <div class="tree-row">
+          <div class="node decision">¿Interacción significativa?</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label si">SÍ</span>
+              <div class="test orange">Efectos simples <code>⚠ NO interpretar A y B aislados</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label no">NO</span>
+              <div class="test green">Interpretar efectos principales por separado <code>A y B independientes</code></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Cuidado con el desbalanceo:</strong> si las celdas tienen tamaños muy distintos,
+          mejor usar GLM o sumas de cuadrados tipo III en lugar del ANOVA factorial clásico.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: MEDIDAS REPETIDAS -->
+  <!-- =============================== -->
+  <div class="swimlane repetidas">
+    <div class="param-label">MEDIDAS REPETIDAS</div>
+    <div class="flow">
+
+      <!-- Caso A: esfericidad -->
+      <div class="case-block">
+        <div class="case-title">A · Esfericidad (supuesto extra) · k mediciones · n sujetos</div>
+
+        <div class="simple-row">
+          <span class="step-tag">PASO 1</span>
+          <div class="node requirement">Descomponer<br>SSW = SSS + SSE</div>
+          <span class="arrow">→</span>
+          <span class="step-tag">PASO 2</span>
+          <div class="node decision sphericity">Test de Mauchly · W ~ χ²</div>
+        </div>
+
+        <div class="tree-row">
+          <div class="node decision sphericity">¿Esférico?</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label si">SÍ</span>
+              <div class="test orange">F-ratio estándar <code>F ~ F_{k−1, (k−1)(n−1)}</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label no">NO</span>
+              <div class="tree-row">
+                <div class="node decision">Calcular ε̂_GG<br>¿ε̂_GG ≥ 0.75?</div>
+                <div class="connector-in"></div>
+                <div class="branches">
+
+                  <div class="branch">
+                    <span class="branch-label si">SÍ</span>
+                    <div class="test orange">Huynh-Feldt (menos conservativa) <code>ε̂_HF</code></div>
+                  </div>
+
+                  <div class="branch">
+                    <span class="branch-label no">NO</span>
+                    <div class="test orange">Greenhouse-Geisser (más conservativa) <code>ε̂_GG</code></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Caso B: F corregido -->
+      <div class="case-block">
+        <div class="case-title">B · F-ratio con gl corregidos</div>
+
+        <div class="simple-row">
+          <div class="node requirement">Aplicar ε̂ a los gl</div>
+          <span class="arrow">→</span>
+          <div class="test orange">F ~ F_{(k−1)ε̂, (k−1)(n−1)ε̂} <code>redondear gl al entero</code></div>
+        </div>
+
+        <div class="note">
+          <strong>Alternativa no paramétrica</strong> si falla normalidad de las diferencias entre sujetos: test de <strong>Friedman</strong>
+          (extensión del Wilcoxon signed-rank a k mediciones).
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- SWIMLANE: POST-HOC -->
+  <!-- =============================== -->
+  <div class="swimlane posthoc">
+    <div class="param-label">POST-HOC</div>
+    <div class="flow">
+
+      <!-- Caso A: planeadas -->
+      <div class="case-block">
+        <div class="case-title">A · Comparaciones planeadas a priori (pocas)</div>
+
+        <div class="simple-row">
+          <div class="node requirement">Pocas comparaciones<br>+ grupos homogéneos</div>
+          <span class="arrow">→</span>
+          <div class="test">Bonferroni <code>α_corregido = α / h</code></div>
+        </div>
+
+        <div class="note">
+          Controla la <strong>TEF = 1 − (1 − α)ʰ</strong>. Es conservador: reduce error tipo I
+          pero aumenta tipo II. No usar si las comparaciones son muchas.
+        </div>
+      </div>
+
+      <!-- Caso B: todas las parejas -->
+      <div class="case-block">
+        <div class="case-title">B · Todas las parejas (no planeadas)</div>
+
+        <div class="tree-row">
+          <div class="node decision">¿Tamaños iguales?</div>
+          <div class="connector-in"></div>
+          <div class="branches">
+
+            <div class="branch">
+              <span class="branch-label si">SÍ</span>
+              <div class="test orange">Tukey HSD <code>HSD = q·√(MSE/n)<br>|X̄ᵢ−X̄ⱼ| &gt; HSD ⇒ signif.</code></div>
+            </div>
+
+            <div class="branch">
+              <span class="branch-label no">NO · desbalanceado</span>
+              <div class="test orange">Tukey-Kramer <code>variante para n distintos</code></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Caso C: exploratorio -->
+      <div class="case-block">
+        <div class="case-title">C · Exploratorio (no para concluir)</div>
+
+        <div class="simple-row">
+          <div class="node requirement">Solo identificar<br>las medias más distantes</div>
+          <span class="arrow">→</span>
+          <div class="test purple">LSD de Fisher <code>X̄ᵢ ± (√2/2)·t·√(SSW/N)</code></div>
+        </div>
+
+        <div class="note">
+          <strong>⚠</strong> LSD <em>no</em> sirve para concluir significancia: solo para detectar
+          qué pares están más alejados visualmente. Para concluir, usar Tukey o Bonferroni.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tabla resumen -->
+  <div class="summary-table">
+    <h3>Resumen comparativo: qué test usar según el diseño</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Diseño</th>
+          <th>Supuestos OK</th>
+          <th>Falla normalidad</th>
+          <th>Falla homocedasticidad</th>
+          <th>Falla esfericidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2 grupos independientes</td>
+          <td>t pooled</td>
+          <td>Mann-Whitney</td>
+          <td>t de Welch</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>2 grupos apareados</td>
+          <td>t pareado</td>
+          <td>Wilcoxon signed-rank</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr class="highlight">
+          <td>k ≥ 3 indep. (1 factor)</td>
+          <td>ANOVA 1F</td>
+          <td>Kruskal-Wallis</td>
+          <td>Welch ANOVA</td>
+          <td>—</td>
+        </tr>
+        <tr class="highlight">
+          <td>k ≥ 3 con 2+ factores</td>
+          <td>ANOVA factorial</td>
+          <td>Transformación / GLM</td>
+          <td>Welch factorial</td>
+          <td>—</td>
+        </tr>
+        <tr class="highlight">
+          <td>k ≥ 3 medidas repetidas</td>
+          <td>ANOVA RM</td>
+          <td>Friedman</td>
+          <td>—</td>
+          <td>Greenhouse-Geisser / Huynh-Feldt</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Basado en: Curso de Nivelación — "Clase 4 · Análisis de la Varianza" (Dra. Andrea Alejandra Rey, ITBA)
+  </div>
+
+</div>
+</body>
+</html>
